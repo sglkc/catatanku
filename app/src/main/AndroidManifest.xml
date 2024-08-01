@@ -15,11 +15,21 @@
         android:theme="@style/Theme.Catatanku"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="id.my.sglkc.catatanku.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".SplashScreenActivity"
+            android:name="id.my.sglkc.catatanku.FormActivity"
             android:exported="false" />
+        <activity
+            android:name="id.my.sglkc.catatanku.SplashScreenActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>

@@ -25,6 +25,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.223"
-        tools:layout_editor_absoluteX="0dp"
-        tools:textAlignment="center" />
+        app:layout_editor_absoluteX="0dp"
+        android:textAlignment="center" />
 </androidx.constraintlayout.widget.ConstraintLayout>

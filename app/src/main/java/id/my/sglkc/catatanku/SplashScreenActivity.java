@@ -23,13 +23,10 @@ public class SplashScreenActivity extends AppCompatActivity {
             return insets;
         });
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Intent i = new Intent(SplashScreenActivity.this, MainActivity.class);
-                startActivity(i);
-                finish();
-            }
+        new Handler().postDelayed(() -> {
+            Intent i = new Intent(SplashScreenActivity.this, MainActivity.class);
+            startActivity(i);
+            finish();
         }, 2000);
     }
 }
