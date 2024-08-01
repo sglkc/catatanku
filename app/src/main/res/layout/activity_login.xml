@@ -17,7 +17,7 @@
             android:id="@+id/imageView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="32dp"
+            android:layout_marginBottom="32sp"
             app:srcCompat="@drawable/digitalent" />
 
         <TextView
@@ -61,6 +61,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32sp"
+            android:textSize="16sp"
             android:text="@string/login_button" />
+
+        <Button
+            android:id="@+id/registerButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32sp"
+            android:backgroundTint="?attr/colorButtonNormal"
+            android:text="@string/register_button"
+            android:textColor="?attr/colorPrimaryDark"
+            android:textSize="16sp" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

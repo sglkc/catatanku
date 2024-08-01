@@ -14,11 +14,12 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class LoginActivity extends AppCompatActivity {
     EditText usernameInput, passwordInput;
-    Button loginButton;
+    Button loginButton, registerButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_login);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -27,23 +28,18 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        if (Account.alreadyLoggedIn()) gotoMain();
+        if (Account.alreadyLoggedIn()) goTo(MainActivity.class);
 
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
 
         loginButton.setOnClickListener(view -> login());
+        registerButton.setOnClickListener(view -> goTo(RegisterActivity.class));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Account.setContext(this);
-    }
-
-    protected void gotoMain() {
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+    protected void goTo(Class<?> activity) {
+        Intent intent = new Intent(LoginActivity.this, activity);
         startActivity(intent);
         finish();
     }
@@ -64,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Password tidak sesuai", Toast.LENGTH_SHORT).show();
                 break;
             case SUCCESS:
-                gotoMain();
+                goTo(MainActivity.class);
                 break;
         }
     }

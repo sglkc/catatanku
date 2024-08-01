@@ -11,7 +11,7 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class Account extends AppCompatActivity {
-    public enum Responses { SUCCESS, ERROR, NOT_FOUND, WRONG_PASSWORD };
+    public enum Responses { SUCCESS, ERROR, NOT_FOUND, WRONG_PASSWORD, ALREADY_EXISTS };
     private final static String ACCOUNTS_DIR = "/accounts", CREDENTIALS = "credentials.txt";
     private static String STORAGE_DIR;
     public static String username, password, email, name, school, address = "";
@@ -48,9 +48,25 @@ public class Account extends AppCompatActivity {
         return text.toString();
     }
 
+    public static Responses register(String[] data) {
+        String username = data[0];
+        String contents = String.join(",", data);
+        File account = new File(STORAGE_DIR + ACCOUNTS_DIR, username);
+
+        if (account.exists()) return Responses.ALREADY_EXISTS;
+
+        try {
+            writeFile(account, contents);
+        } catch (IOException e) {
+            return Responses.ERROR;
+        }
+
+        login(data[0], data[1]);
+        return Responses.SUCCESS;
+    }
+
     public static Responses login(String username, String password) {
-        String accountsDir = STORAGE_DIR + ACCOUNTS_DIR;
-        File account = new File(accountsDir, username);
+        File account = new File(STORAGE_DIR + ACCOUNTS_DIR, username);
 
         if (!account.exists()) return Responses.NOT_FOUND;
 
@@ -62,12 +78,21 @@ public class Account extends AppCompatActivity {
             return Responses.ERROR;
         }
 
-        String[] credentials = text.split(";");
+        String[] data = text.split(";");
 
-        if (!credentials[1].equals(password)) return Responses.WRONG_PASSWORD;
+        if (!data[1].equals(password)) return Responses.WRONG_PASSWORD;
 
+        setDetails(data);
         saveLogin();
         return Responses.SUCCESS;
+    }
+
+    protected static void writeFile(File file, String contents) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(file, false);
+        file.createNewFile();
+        outputStream.write(contents.toString().getBytes());
+        outputStream.flush();
+        outputStream.close();
     }
 
     public static boolean saveLogin() {
@@ -75,11 +100,7 @@ public class Account extends AppCompatActivity {
         File file = new File(STORAGE_DIR, CREDENTIALS);
 
         try {
-            FileOutputStream outputStream = new FileOutputStream(file, false);
-            file.createNewFile();
-            outputStream.write(credentials.toString().getBytes());
-            outputStream.flush();
-            outputStream.close();
+            writeFile(file, credentials);
         } catch (IOException e) {
             return false;
         }

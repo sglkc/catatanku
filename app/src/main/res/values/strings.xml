@@ -7,4 +7,9 @@
     <string name="password">Password</string>
     <string name="login_button">Masuk</string>
     <string name="register_button">Daftar</string>
+    <string name="back_button">Kembali</string>
+    <string name="email">Email</string>
+    <string name="name">Nama Lengkap</string>
+    <string name="school">Asal Sekolah</string>
+    <string name="address">Alamat</string>
 </resources>
