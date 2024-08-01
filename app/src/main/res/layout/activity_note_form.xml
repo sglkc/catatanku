@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".FormActivity">
+    tools:context=".NoteFormActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,11 +18,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16sp"
-            android:text="@string/judul"
+            android:text="@string/title"
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/editTitle"
+            android:id="@+id/titleInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16sp"
@@ -36,11 +36,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32sp"
-            android:text="@string/isi_catatan"
+            android:text="@string/note_content"
             android:textSize="18sp" />
 
         <EditText
-            android:id="@+id/editNote"
+            android:id="@+id/noteInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16sp"
@@ -56,5 +56,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="32sp"
             android:text="@string/save_button" />
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

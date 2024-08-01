@@ -1,9 +1,7 @@
 package id.my.sglkc.catatanku;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,9 +18,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 
-public class FormActivity extends AppCompatActivity {
+public class NoteFormActivity extends AppCompatActivity {
     EditText titleInput, noteInput;
     Button saveButton;
     String title, note;
@@ -31,7 +28,7 @@ public class FormActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_form);
+        setContentView(R.layout.activity_note_form);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -39,8 +36,8 @@ public class FormActivity extends AppCompatActivity {
         });
 
         // definisi komponen
-        titleInput = findViewById(R.id.editTitle);
-        noteInput = findViewById(R.id.editNote);
+        titleInput = findViewById(R.id.titleInput);
+        noteInput = findViewById(R.id.noteInput);
         saveButton = findViewById(R.id.saveButton);
         Bundle extras = getIntent().getExtras();
 

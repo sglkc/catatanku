@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Catatanku</string>
-    <string name="judul">Judul</string>
-    <string name="isi_catatan">Isi Catatan</string>
+    <string name="title">Judul</string>
+    <string name="note_content">Isi Catatan</string>
     <string name="save_button">Simpan</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
 </resources>

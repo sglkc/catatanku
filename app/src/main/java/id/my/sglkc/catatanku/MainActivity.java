@@ -1,16 +1,9 @@
 package id.my.sglkc.catatanku;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
-import android.view.Window;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -27,7 +20,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -101,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void addNote() {
-        Intent intent = new Intent(MainActivity.this, FormActivity.class);
+        Intent intent = new Intent(MainActivity.this, NoteFormActivity.class);
         startActivity(intent);
     }
 
@@ -130,7 +122,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void updateNote(int id) {
-        Intent intent = new Intent(MainActivity.this, FormActivity.class);
+        Intent intent = new Intent(MainActivity.this, NoteFormActivity.class);
         Map<String, Object> data = (Map<String, Object>) simpleAdapter.getItem(id);
         String name = data.get("name").toString();
 
