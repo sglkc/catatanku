@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.Toast;
@@ -24,7 +26,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
-    final int REQUEST_CODE = 100;
     ListView listView;
     FloatingActionButton addButton;
     ArrayList<Map<String, Object>> notes;
@@ -42,9 +43,6 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        // mengizinkan akses penyimpanan
-        getStoragePermission();
-
         // definisi komponen activity
         listView = findViewById(R.id.listView);
         addButton = findViewById(R.id.addButton);
@@ -61,40 +59,42 @@ public class MainActivity extends AppCompatActivity {
         listView.setOnItemLongClickListener((adapterView, view, i, l) -> deleteNote(i));
 
         // klik tombol untuk tambah
-        addButton.setOnClickListener(view -> addNote());
+        addButton.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, NoteFormActivity.class);
+            startActivity(intent);
+        });
     }
 
-    private boolean getStoragePermission() {
-        if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_CODE);
-            return false;
-        }
-        
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (REQUEST_CODE != 112) return;
-
-        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            refreshNotes();
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.logoutItem) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Keluar dari akun ini?")
+                    .setPositiveButton("Keluar", (dialog, whichButton) -> {
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        Account.logout();
+                        startActivity(intent);
+                        finish();
+                    })
+                    .setNegativeButton("Kembali", null)
+                    .show();
         } else {
-            Toast.makeText(this, "Izinkan akses penyimpanan untuk menyimpan catatan", Toast.LENGTH_LONG).show();
+            return false;
         }
+
+        return true;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         refreshNotes();
-    }
-
-    protected void addNote() {
-        Intent intent = new Intent(MainActivity.this, NoteFormActivity.class);
-        startActivity(intent);
     }
 
     protected void refreshNotes() {
@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Hapus", (dialog, whichButton) -> {
                     File file = new File(path, filename);
                     if (file.exists()) file.delete();
+                    refreshNotes();
                 })
                 .setNegativeButton("Kembali", null)
                 .show();

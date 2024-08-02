@@ -2,6 +2,7 @@ package id.my.sglkc.catatanku;
 
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -21,7 +22,7 @@ import java.io.IOException;
 
 public class NoteFormActivity extends AppCompatActivity {
     EditText titleInput, noteInput;
-    Button saveButton;
+    Button saveButton, backButton;
     String title, note;
 
     @Override
@@ -39,6 +40,7 @@ public class NoteFormActivity extends AppCompatActivity {
         titleInput = findViewById(R.id.titleInput);
         noteInput = findViewById(R.id.noteInput);
         saveButton = findViewById(R.id.saveButton);
+        backButton = findViewById(R.id.backButton);
         Bundle extras = getIntent().getExtras();
 
         // jika ada state masuk, maka mode edit
@@ -54,6 +56,7 @@ public class NoteFormActivity extends AppCompatActivity {
         }
 
         saveButton.setOnClickListener(view -> writeNote());
+        backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
     protected void readNote() {
@@ -75,9 +78,8 @@ public class NoteFormActivity extends AppCompatActivity {
                 text.append(line);
                 line = br.readLine();
             }
-        } catch (FileNotFoundException e) {
-            Toast.makeText(this, "Catatan tidak dapat ditemukan", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
+            Log.e("NoteFormActivity", e.toString());
             Toast.makeText(this, "Isi catatan tidak dapat dibaca", Toast.LENGTH_SHORT).show();
         }
 
@@ -104,6 +106,7 @@ public class NoteFormActivity extends AppCompatActivity {
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
+            Log.e("NoteFormActivity", e.toString());
             Toast.makeText(this, "Tidak dapat menyimpan catatan", Toast.LENGTH_SHORT).show();
         }
 

@@ -7,7 +7,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -29,13 +28,6 @@ public class RegisterActivity extends AppCompatActivity {
             return insets;
         });
 
-        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-            @Override
-            public void handleOnBackPressed() {
-                goTo(LoginActivity.class);
-            }
-        });
-
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
         emailInput = findViewById(R.id.emailInput);
@@ -49,12 +41,6 @@ public class RegisterActivity extends AppCompatActivity {
         backButton.setOnClickListener(view -> getOnBackPressedDispatcher().onBackPressed());
     }
 
-    protected void goTo(Class<?> activity) {
-        Intent intent = new Intent(RegisterActivity.this, activity);
-        startActivity(intent);
-        finish();
-    }
-
     protected String[] validate() throws Exception {
         String username = usernameInput.getText().toString();
         String password = passwordInput.getText().toString();
@@ -64,9 +50,9 @@ public class RegisterActivity extends AppCompatActivity {
         String address = addressInput.getText().toString();
         String[] data = new String[]{username, password, email, name, school, address};
 
-        for (String input: data) {
-            if (input.isEmpty()) throw new Exception();
-        }
+//        for (String input: data) {
+//            if (input.isEmpty()) throw new Exception();
+//        }
 
         return data;
     }
@@ -91,7 +77,9 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(this, "Username sudah dipakai", Toast.LENGTH_SHORT).show();
                 break;
             case SUCCESS:
-                goTo(MainActivity.class);
+                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
+                startActivity(intent);
+                finish();
                 break;
         }
     }

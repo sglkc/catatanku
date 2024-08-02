@@ -12,4 +12,6 @@
     <string name="name">Nama Lengkap</string>
     <string name="school">Asal Sekolah</string>
     <string name="address">Alamat</string>
+    <string name="logout">Keluar</string>
+    <string name="register_form">Pendaftaran</string>
 </resources>

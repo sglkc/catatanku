@@ -28,18 +28,22 @@ public class LoginActivity extends AppCompatActivity {
             return insets;
         });
 
-        if (Account.alreadyLoggedIn()) goTo(MainActivity.class);
+        if (Account.alreadyLoggedIn()) goToMain();
 
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
         loginButton = findViewById(R.id.loginButton);
+        registerButton = findViewById(R.id.registerButton);
 
         loginButton.setOnClickListener(view -> login());
-        registerButton.setOnClickListener(view -> goTo(RegisterActivity.class));
+        registerButton.setOnClickListener(view -> {
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
+        });
     }
 
-    protected void goTo(Class<?> activity) {
-        Intent intent = new Intent(LoginActivity.this, activity);
+    protected void goToMain() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         startActivity(intent);
         finish();
     }
@@ -60,7 +64,7 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this, "Password tidak sesuai", Toast.LENGTH_SHORT).show();
                 break;
             case SUCCESS:
-                goTo(MainActivity.class);
+                goToMain();
                 break;
         }
     }

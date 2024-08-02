@@ -1,6 +1,7 @@
 package id.my.sglkc.catatanku;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,12 +13,21 @@ import java.io.IOException;
 
 public class Account extends AppCompatActivity {
     public enum Responses { SUCCESS, ERROR, NOT_FOUND, WRONG_PASSWORD, ALREADY_EXISTS };
-    private final static String ACCOUNTS_DIR = "/accounts", CREDENTIALS = "credentials.txt";
+    private final static String ACCOUNTS_DIR = "/accounts"
+            , CREDENTIALS = "credentials.txt"
+            , DELIMITER = ";;";
     private static String STORAGE_DIR;
     public static String username, password, email, name, school, address = "";
 
-    public static void setContext(Context context) {
-        Account.STORAGE_DIR = context.getApplicationContext().getFilesDir().toString();
+    public static boolean setContext(Context context) {
+        Account.STORAGE_DIR = context.getFilesDir().toString();
+        File accountsDir = new File(STORAGE_DIR + ACCOUNTS_DIR);
+
+        if (!accountsDir.exists()) {
+            accountsDir.mkdirs();
+        }
+
+        return true;
     }
 
     public static void setDetails(String ...args) {
@@ -48,9 +58,17 @@ public class Account extends AppCompatActivity {
         return text.toString();
     }
 
+    protected static void writeFile(File file, String contents) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(file, false);
+        file.createNewFile();
+        outputStream.write(contents.toString().getBytes());
+        outputStream.flush();
+        outputStream.close();
+    }
+
     public static Responses register(String[] data) {
         String username = data[0];
-        String contents = String.join(",", data);
+        String contents = String.join(DELIMITER, data);
         File account = new File(STORAGE_DIR + ACCOUNTS_DIR, username);
 
         if (account.exists()) return Responses.ALREADY_EXISTS;
@@ -58,9 +76,11 @@ public class Account extends AppCompatActivity {
         try {
             writeFile(account, contents);
         } catch (IOException e) {
+            Log.e("Account", e.toString());
             return Responses.ERROR;
         }
 
+        Log.i("ACCOUNT", contents);
         login(data[0], data[1]);
         return Responses.SUCCESS;
     }
@@ -70,16 +90,18 @@ public class Account extends AppCompatActivity {
 
         if (!account.exists()) return Responses.NOT_FOUND;
 
-        String text;
+        String contents;
 
         try {
-            text = readFile(account);
+            contents = readFile(account);
         } catch (IOException e) {
+            Log.e("Account", e.toString());
             return Responses.ERROR;
         }
 
-        String[] data = text.split(";");
+        String[] data = contents.split(DELIMITER);
 
+        Log.i("ACCOUNT", contents);
         if (!data[1].equals(password)) return Responses.WRONG_PASSWORD;
 
         setDetails(data);
@@ -87,21 +109,14 @@ public class Account extends AppCompatActivity {
         return Responses.SUCCESS;
     }
 
-    protected static void writeFile(File file, String contents) throws IOException {
-        FileOutputStream outputStream = new FileOutputStream(file, false);
-        file.createNewFile();
-        outputStream.write(contents.toString().getBytes());
-        outputStream.flush();
-        outputStream.close();
-    }
-
     public static boolean saveLogin() {
-        String credentials = username + ";" + password;
+        String credentials = username + DELIMITER + password;
         File file = new File(STORAGE_DIR, CREDENTIALS);
 
         try {
             writeFile(file, credentials);
         } catch (IOException e) {
+            Log.e("Account", e.toString());
             return false;
         }
 
@@ -115,13 +130,20 @@ public class Account extends AppCompatActivity {
 
         try {
             String text = readFile(file);
-            String[] data = text.split(";");
+            String[] data = text.split(DELIMITER);
 
-            setDetails(data);
+            login(data[0], data[1]);
         } catch (IOException e) {
+            Log.e("Account", e.toString());
             return false;
         }
 
         return true;
+    }
+
+    public static void logout() {
+        File file = new File(STORAGE_DIR, CREDENTIALS);
+
+        if (file.exists()) file.delete();
     }
 }

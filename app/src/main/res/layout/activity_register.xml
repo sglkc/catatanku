@@ -14,8 +14,19 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:padding="32sp"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16sp"
+                android:text="@string/register_form"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:textColor="@color/black" />
 
             <TextView
                 android:id="@+id/textView1"
@@ -29,11 +40,10 @@
                 android:id="@+id/usernameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16sp"
                 android:ems="10"
                 android:inputType="text"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textView2"
@@ -47,11 +57,10 @@
                 android:id="@+id/passwordInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16sp"
                 android:ems="10"
                 android:inputType="textPassword"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -65,11 +74,10 @@
                 android:id="@+id/emailInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16sp"
                 android:ems="10"
                 android:inputType="textEmailAddress"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textView4"
@@ -83,11 +91,10 @@
                 android:id="@+id/nameInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16sp"
                 android:ems="10"
                 android:inputType="text"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textView5"
@@ -101,11 +108,10 @@
                 android:id="@+id/schoolInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16sp"
                 android:ems="10"
                 android:inputType="text"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
             <TextView
                 android:id="@+id/textView6"
@@ -119,19 +125,17 @@
                 android:id="@+id/addressInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16sp"
                 android:ems="10"
                 android:inputType="text"
                 android:singleLine="true"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
 
             <Button
                 android:id="@+id/registerButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32sp"
-                android:text="@string/register_button"
-                android:textSize="16sp" />
+                android:text="@string/register_button" />
 
             <Button
                 android:id="@+id/backButton"
@@ -140,8 +144,7 @@
                 android:layout_marginBottom="32sp"
                 android:backgroundTint="?attr/colorButtonNormal"
                 android:text="@string/back_button"
-                android:textColor="?attr/colorPrimaryDark"
-                android:textSize="16sp" />
+                android:textColor="?attr/colorPrimaryDark" />
         </LinearLayout>
     </ScrollView>
 
