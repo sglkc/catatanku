@@ -67,7 +67,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 Intent i = new Intent(SplashScreenActivity.this, LoginActivity.class);
                 startActivity(i);
                 finish();
-            }, 2000);
+            }, 1000);
         } else {
             Toast.makeText(this, "Izinkan akses penyimpanan untuk menggunakan aplikasi", Toast.LENGTH_LONG).show();
         }

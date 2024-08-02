@@ -1,5 +1,6 @@
 package id.my.sglkc.catatanku;
 
+import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -16,18 +17,17 @@ public class Account extends AppCompatActivity {
     private final static String ACCOUNTS_DIR = "/accounts"
             , CREDENTIALS = "credentials.txt"
             , DELIMITER = ";;";
-    private static String STORAGE_DIR;
+    private static String STORAGE_DIR, EXTERNAL_DIR;
     public static String username, password, email, name, school, address = "";
 
-    public static boolean setContext(Context context) {
+    public static void setContext(Context context) {
+        // penyimpanan internal (rahasia)
         Account.STORAGE_DIR = context.getFilesDir().toString();
+        // penyimpanan external (Android/data/...)
+        Account.EXTERNAL_DIR = context.getExternalFilesDir(null).toString();
         File accountsDir = new File(STORAGE_DIR + ACCOUNTS_DIR);
 
-        if (!accountsDir.exists()) {
-            accountsDir.mkdirs();
-        }
-
-        return true;
+        if (!accountsDir.exists()) accountsDir.mkdirs();
     }
 
     public static void setDetails(String ...args) {
@@ -37,6 +37,10 @@ public class Account extends AppCompatActivity {
         name = args[3];
         school = args[4];
         address = args[5];
+    }
+
+    public static String getNotesDir() {
+        return EXTERNAL_DIR + "/" + username;
     }
 
     public static String readFile(File file) throws IOException {
@@ -74,6 +78,11 @@ public class Account extends AppCompatActivity {
         if (account.exists()) return Responses.ALREADY_EXISTS;
 
         try {
+            // create notes folder
+            File notes = new File(getNotesDir());
+            notes.mkdirs();
+
+            // write account details
             writeFile(account, contents);
         } catch (IOException e) {
             Log.e("Account", e.toString());

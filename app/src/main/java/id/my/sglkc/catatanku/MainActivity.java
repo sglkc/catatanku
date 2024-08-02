@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
+    private String NOTES_DIR;
     ListView listView;
     FloatingActionButton addButton;
     ArrayList<Map<String, Object>> notes;
@@ -44,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // definisi komponen activity
+        NOTES_DIR = Account.getNotesDir();
         listView = findViewById(R.id.listView);
         addButton = findViewById(R.id.addButton);
         notes = new ArrayList<Map<String, Object>>();
@@ -98,8 +100,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void refreshNotes() {
-        String path = getExternalFilesDir(null) + "/catatanku";
-        File directory = new File(path);
+        File directory = new File(NOTES_DIR);
 
         if (!directory.exists()) return;
 
@@ -134,12 +135,11 @@ public class MainActivity extends AppCompatActivity {
     protected boolean deleteNote(int id) {
         Map<String, Object> data = (Map<String, Object>) simpleAdapter.getItem(id);
         String filename = data.get("name").toString();
-        String path = getExternalFilesDir(null) + "/catatan";
 
         new AlertDialog.Builder(this)
                 .setTitle("Hapus catatan "+ filename + "?")
                 .setPositiveButton("Hapus", (dialog, whichButton) -> {
-                    File file = new File(path, filename);
+                    File file = new File(NOTES_DIR, filename);
                     if (file.exists()) file.delete();
                     refreshNotes();
                 })

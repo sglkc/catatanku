@@ -51,6 +51,12 @@ public class LoginActivity extends AppCompatActivity {
     protected void login() {
         String username = usernameInput.getText().toString();
         String password = passwordInput.getText().toString();
+
+        if (username.isEmpty() || password.isEmpty()) {
+            Toast.makeText(this, "Input tidak boleh kosong!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Account.Responses res = Account.login(username, password);
 
         switch (res) {

@@ -19,8 +19,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class NoteFormActivity extends AppCompatActivity {
+    private String NOTES_DIR;
     EditText titleInput, noteInput;
     Button saveButton, backButton;
     String title, note;
@@ -37,6 +39,7 @@ public class NoteFormActivity extends AppCompatActivity {
         });
 
         // definisi komponen
+        NOTES_DIR = Account.getNotesDir();
         titleInput = findViewById(R.id.titleInput);
         noteInput = findViewById(R.id.noteInput);
         saveButton = findViewById(R.id.saveButton);
@@ -60,8 +63,7 @@ public class NoteFormActivity extends AppCompatActivity {
     }
 
     protected void readNote() {
-        String path = getExternalFilesDir(null) + "/catatanku";
-        File file = new File(path, titleInput.getText().toString());
+        File file = new File(NOTES_DIR, titleInput.getText().toString());
 
         if (!file.exists()) {
             Toast.makeText(this, "Catatan tidak dapat ditemukan", Toast.LENGTH_SHORT).show();
@@ -92,17 +94,23 @@ public class NoteFormActivity extends AppCompatActivity {
 
         if (!state.equals(Environment.MEDIA_MOUNTED)) return;
 
-        String path = getExternalFilesDir(null) + "/catatanku";
-        File parent = new File(path);
+        String title = titleInput.getText().toString();
+        String note = noteInput.getText().toString();
+        
+        if (title.isEmpty() || note.isEmpty()) {
+            Toast.makeText(this, "Judul dan isi tidak boleh kosong!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        File parent = new File(NOTES_DIR);
 
         if (!parent.exists()) parent.mkdirs();
 
         try {
-            File file = new File(path, titleInput.getText().toString());
+            File file = new File(parent, title);
             FileOutputStream outputStream = new FileOutputStream(file, false);
 
             file.createNewFile();
-            outputStream.write(noteInput.getText().toString().getBytes());
+            outputStream.write(note.getBytes());
             outputStream.flush();
             outputStream.close();
         } catch (IOException e) {
