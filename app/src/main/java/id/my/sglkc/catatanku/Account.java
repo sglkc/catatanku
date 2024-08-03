@@ -1,33 +1,23 @@
 package id.my.sglkc.catatanku;
 
-import android.app.Application;
+import android.content.ContentValues;
 import android.content.Context;
-import android.util.Log;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import id.my.sglkc.catatanku.database.AccountsTable;
+import id.my.sglkc.catatanku.database.DatabaseHelper;
+import id.my.sglkc.catatanku.database.LoggedInTable;
 
 public class Account extends AppCompatActivity {
     public enum Responses { SUCCESS, ERROR, NOT_FOUND, WRONG_PASSWORD, ALREADY_EXISTS };
-    private final static String ACCOUNTS_DIR = "/accounts"
-            , CREDENTIALS = "credentials.txt"
-            , DELIMITER = ";;";
-    private static String STORAGE_DIR, EXTERNAL_DIR;
     public static String username, password, email, name, school, address = "";
+    public static DatabaseHelper dbHelper;
 
     public static void setContext(Context context) {
-        // penyimpanan internal (rahasia)
-        Account.STORAGE_DIR = context.getFilesDir().toString();
-        // penyimpanan external (Android/data/...)
-        Account.EXTERNAL_DIR = context.getExternalFilesDir(null).toString();
-        File accountsDir = new File(STORAGE_DIR + ACCOUNTS_DIR);
-
-        if (!accountsDir.exists()) accountsDir.mkdirs();
+        dbHelper = new DatabaseHelper(context);
     }
 
     public static void setDetails(String ...args) {
@@ -39,120 +29,91 @@ public class Account extends AppCompatActivity {
         address = args[5];
     }
 
-    public static String getNotesDir() {
-        return EXTERNAL_DIR + "/" + username;
-    }
-
-    public static String readFile(File file) throws IOException {
-        return readFile(file.toString());
-    }
-
-    public static String readFile(String filename) throws IOException {
-        StringBuilder text = new StringBuilder();
-        BufferedReader br = new BufferedReader(new FileReader(filename));
-        String line = br.readLine();
-
-        while (line != null) {
-            text.append(line);
-            line = br.readLine();
-        }
-
-        br.close();
-
-        return text.toString();
-    }
-
-    protected static void writeFile(File file, String contents) throws IOException {
-        FileOutputStream outputStream = new FileOutputStream(file, false);
-        file.createNewFile();
-        outputStream.write(contents.toString().getBytes());
-        outputStream.flush();
-        outputStream.close();
-    }
-
     public static Responses register(String[] data) {
-        String username = data[0];
-        String contents = String.join(DELIMITER, data);
-        File account = new File(STORAGE_DIR + ACCOUNTS_DIR, username);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
 
-        if (account.exists()) return Responses.ALREADY_EXISTS;
+        values.put(AccountsTable.USERNAME, data[0]);
+        values.put(AccountsTable.PASSWORD, data[1]);
+        values.put(AccountsTable.EMAIL, data[2]);
+        values.put(AccountsTable.NAME, data[3]);
+        values.put(AccountsTable.SCHOOL, data[4]);
+        values.put(AccountsTable.ADDRESS, data[5]);
 
-        try {
-            // create notes folder
-            File notes = new File(getNotesDir());
-            notes.mkdirs();
+        long result = db.insert(AccountsTable.TABLE, null, values);
 
-            // write account details
-            writeFile(account, contents);
-        } catch (IOException e) {
-            Log.e("Account", e.toString());
-            return Responses.ERROR;
-        }
+        if (result == -1) return Responses.ALREADY_EXISTS;
 
-        Log.i("ACCOUNT", contents);
         login(data[0], data[1]);
         return Responses.SUCCESS;
     }
 
     public static Responses login(String username, String password) {
-        File account = new File(STORAGE_DIR + ACCOUNTS_DIR, username);
+      return Account.login(username, password, true);
+    }
 
-        if (!account.exists()) return Responses.NOT_FOUND;
+    public static Responses login(String username, String password, boolean save) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query(
+                AccountsTable.TABLE,
+                null,
+                AccountsTable.USERNAME + " = ? AND " + AccountsTable.PASSWORD + " = ?",
+                new String[] { username, password },
+                null,
+                null,
+                null);
 
-        String contents;
+        int columnCount = cursor.getColumnCount();
+//        int resultCount = cursor.getCount();
 
-        try {
-            contents = readFile(account);
-        } catch (IOException e) {
-            Log.e("Account", e.toString());
+        if (!cursor.moveToFirst()) return Responses.NOT_FOUND;
+
+        String[] data = new String[columnCount];
+
+        for (int i = 0; i < columnCount; i++) {
+            data[i] = cursor.getString(i);
+        }
+
+        cursor.close();
+        setDetails(data);
+
+        if (save && !saveLogin()) {
             return Responses.ERROR;
         }
 
-        String[] data = contents.split(DELIMITER);
-
-        Log.i("ACCOUNT", contents);
-        if (!data[1].equals(password)) return Responses.WRONG_PASSWORD;
-
-        setDetails(data);
-        saveLogin();
         return Responses.SUCCESS;
     }
 
     public static boolean saveLogin() {
-        String credentials = username + DELIMITER + password;
-        File file = new File(STORAGE_DIR, CREDENTIALS);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
 
-        try {
-            writeFile(file, credentials);
-        } catch (IOException e) {
-            Log.e("Account", e.toString());
-            return false;
-        }
+        values.put(LoggedInTable.USERNAME, username);
+        values.put(LoggedInTable.PASSWORD, password);
 
-        return true;
+        long result = db.insert(LoggedInTable.TABLE, null, values);
+
+        return result != 0;
     }
 
     public static boolean alreadyLoggedIn() {
-        File file = new File(STORAGE_DIR, CREDENTIALS);
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query(LoggedInTable.TABLE, null, null, null, null, null, null, "1");
 
-        if (!file.exists()) return false;
+        if (!cursor.moveToFirst()) return false;
 
-        try {
-            String text = readFile(file);
-            String[] data = text.split(DELIMITER);
+        String username = cursor.getString(0);
+        String password = cursor.getString(1);
 
-            login(data[0], data[1]);
-        } catch (IOException e) {
-            Log.e("Account", e.toString());
-            return false;
-        }
+        login(username, password, false);
+        cursor.close();
 
         return true;
     }
 
     public static void logout() {
-        File file = new File(STORAGE_DIR, CREDENTIALS);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        if (file.exists()) file.delete();
+        db.delete(LoggedInTable.TABLE, LoggedInTable.USERNAME + " = ?", new String[] { username });
     }
 }
