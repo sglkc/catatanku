@@ -113,7 +113,6 @@ public class Account extends AppCompatActivity {
 
     public static void logout() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        db.delete(LoggedInTable.TABLE, LoggedInTable.USERNAME + " = ?", new String[] { username });
+        db.delete(LoggedInTable.TABLE, "1", null);
     }
 }
