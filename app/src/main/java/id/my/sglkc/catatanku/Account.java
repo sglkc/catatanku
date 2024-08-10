@@ -4,12 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import id.my.sglkc.catatanku.database.AccountsTable;
 import id.my.sglkc.catatanku.database.DatabaseHelper;
 import id.my.sglkc.catatanku.database.LoggedInTable;
+import id.my.sglkc.catatanku.database.NotesTable;
 
 public class Account extends AppCompatActivity {
     public enum Responses { SUCCESS, ERROR, NOT_FOUND, WRONG_PASSWORD, ALREADY_EXISTS };
@@ -57,8 +59,8 @@ public class Account extends AppCompatActivity {
         Cursor cursor = db.query(
                 AccountsTable.TABLE,
                 null,
-                AccountsTable.USERNAME + " = ? AND " + AccountsTable.PASSWORD + " = ?",
-                new String[] { username, password },
+                AccountsTable.USERNAME + " = ?",
+                new String[] { username },
                 null,
                 null,
                 null);
@@ -66,7 +68,11 @@ public class Account extends AppCompatActivity {
         int columnCount = cursor.getColumnCount();
 //        int resultCount = cursor.getCount();
 
-        if (!cursor.moveToFirst()) return Responses.NOT_FOUND;
+        if (!cursor.moveToFirst())
+            return Responses.NOT_FOUND;
+
+        if (!cursor.getString(cursor.getColumnIndexOrThrow(AccountsTable.PASSWORD)).equals(password))
+            return Responses.WRONG_PASSWORD;
 
         String[] data = new String[columnCount];
 
@@ -102,8 +108,8 @@ public class Account extends AppCompatActivity {
 
         if (!cursor.moveToFirst()) return false;
 
-        String username = cursor.getString(0);
-        String password = cursor.getString(1);
+        String username = cursor.getString(cursor.getColumnIndexOrThrow(AccountsTable.USERNAME));
+        String password = cursor.getString(cursor.getColumnIndexOrThrow(AccountsTable.PASSWORD));
 
         login(username, password, false);
         cursor.close();

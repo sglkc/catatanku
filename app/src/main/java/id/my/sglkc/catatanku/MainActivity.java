@@ -3,7 +3,10 @@ package id.my.sglkc.catatanku;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
@@ -25,8 +28,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import id.my.sglkc.catatanku.database.LoggedInTable;
+import id.my.sglkc.catatanku.database.NotesTable;
+
 public class MainActivity extends AppCompatActivity {
-    private String NOTES_DIR;
     ListView listView;
     FloatingActionButton addButton;
     ArrayList<Map<String, Object>> notes;
@@ -45,10 +50,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // definisi komponen activity
-        NOTES_DIR = Account.getNotesDir();
         listView = findViewById(R.id.listView);
         addButton = findViewById(R.id.addButton);
-        notes = new ArrayList<Map<String, Object>>();
+        notes = new ArrayList();
         simpleAdapter = new SimpleAdapter(this, notes, android.R.layout.simple_list_item_2,
                 new String[]{"name", "date"}, new int[]{android.R.id.text1, android.R.id.text2});
 
@@ -100,47 +104,57 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void refreshNotes() {
-        File directory = new File(NOTES_DIR);
+        if (Account.username == null) return;
 
-        if (!directory.exists()) return;
-
-        File[] files = directory.listFiles();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM YYYY HH:mm:ss");
+        SQLiteDatabase db = Account.dbHelper.getReadableDatabase();
+        Cursor cursor = db.query(
+                NotesTable.TABLE,
+                null,
+                NotesTable.USERNAME + " = ?",
+                new String[]{ Account.username },
+                null,
+                null,
+                null);
 
         notes.clear();
 
-        for (File file : files) {
-            String filename = file.getName();
-            String lastModified = simpleDateFormat.format(file.lastModified());
+        while (cursor.moveToNext()) {
             Map<String, Object> note = new HashMap<>();
+            long id = cursor.getLong(cursor.getColumnIndexOrThrow(NotesTable.ID));
+            String title = cursor.getString(cursor.getColumnIndexOrThrow(NotesTable.TITLE));
+//            String content = cursor.getString(cursor.getColumnIndexOrThrow(NotesTable.CONTENT));
+            String modifed = cursor.getString(cursor.getColumnIndexOrThrow(NotesTable.MODIFIED));
 
-            note.put("name", filename);
-            note.put("date", lastModified);
+            note.put("id", String.valueOf(id));
+            note.put("name", title);
+            note.put("date", modifed);
             notes.add(0, note);
         }
 
         simpleAdapter.notifyDataSetChanged();
     }
 
-    protected void updateNote(int id) {
+    protected void updateNote(int index) {
         Intent intent = new Intent(MainActivity.this, NoteFormActivity.class);
-        Map<String, Object> data = (Map<String, Object>) simpleAdapter.getItem(id);
-        String name = data.get("name").toString();
+        Map<String, Object> data = (Map<String, Object>) simpleAdapter.getItem(index);
+        String id = data.get("id").toString();
+        String title = data.get("name").toString();
 
-        Toast.makeText(this, "Mengubah catatan " + name, Toast.LENGTH_SHORT).show();
-        intent.putExtra("name", name);
+        Toast.makeText(this, "Mengubah catatan " + title, Toast.LENGTH_SHORT).show();
+        intent.putExtra("id", id);
         startActivity(intent);
     }
 
-    protected boolean deleteNote(int id) {
-        Map<String, Object> data = (Map<String, Object>) simpleAdapter.getItem(id);
-        String filename = data.get("name").toString();
+    protected boolean deleteNote(int index) {
+        SQLiteDatabase db = Account.dbHelper.getWritableDatabase();
+        Map<String, Object> data = (Map<String, Object>) simpleAdapter.getItem(index);
+        String id = data.get("id").toString();
+        String title = data.get("name").toString();
 
         new AlertDialog.Builder(this)
-                .setTitle("Hapus catatan "+ filename + "?")
+                .setTitle("Hapus catatan "+ title + "?")
                 .setPositiveButton("Hapus", (dialog, whichButton) -> {
-                    File file = new File(NOTES_DIR, filename);
-                    if (file.exists()) file.delete();
+                    db.delete(NotesTable.TABLE, NotesTable.ID + " = ?", new String[] { id });
                     refreshNotes();
                 })
                 .setNegativeButton("Kembali", null)

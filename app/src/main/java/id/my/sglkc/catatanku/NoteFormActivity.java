@@ -1,5 +1,8 @@
 package id.my.sglkc.catatanku;
 
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -20,12 +23,16 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import id.my.sglkc.catatanku.database.LoggedInTable;
+import id.my.sglkc.catatanku.database.NotesTable;
 
 public class NoteFormActivity extends AppCompatActivity {
-    private String NOTES_DIR;
     EditText titleInput, noteInput;
     Button saveButton, backButton;
-    String title, note;
+    String id, title, note, modified;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,20 +46,17 @@ public class NoteFormActivity extends AppCompatActivity {
         });
 
         // definisi komponen
-        NOTES_DIR = Account.getNotesDir();
         titleInput = findViewById(R.id.titleInput);
         noteInput = findViewById(R.id.noteInput);
         saveButton = findViewById(R.id.saveButton);
         backButton = findViewById(R.id.backButton);
+        modified = new SimpleDateFormat("dd MMM YYYY HH:mm:ss").format(new Date());
         Bundle extras = getIntent().getExtras();
 
         // jika ada state masuk, maka mode edit
         if (extras != null) {
+            id = extras.getString("id");
             getSupportActionBar().setTitle("Ubah Catatan");
-            title = extras.getString("name");
-
-            titleInput.setText(title);
-            titleInput.setEnabled(false);
             readNote();
         } else {
             getSupportActionBar().setTitle("Tambah catatan");
@@ -63,59 +67,54 @@ public class NoteFormActivity extends AppCompatActivity {
     }
 
     protected void readNote() {
-        File file = new File(NOTES_DIR, titleInput.getText().toString());
+        SQLiteDatabase db = Account.dbHelper.getReadableDatabase();
+        Cursor cursor = db.query(
+                NotesTable.TABLE,
+                null,
+                NotesTable.ID + " = ?",
+                new String[] { id },
+                null,
+                null,
+                null);
 
-        if (!file.exists()) {
+        if (!cursor.moveToFirst()) {
             Toast.makeText(this, "Catatan tidak dapat ditemukan", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        StringBuilder text = new StringBuilder();
+        String title = cursor.getString(cursor.getColumnIndexOrThrow(NotesTable.TITLE));
+        String content = cursor.getString(cursor.getColumnIndexOrThrow(NotesTable.CONTENT));
 
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line = br.readLine();
-
-            while (line != null) {
-                text.append(line);
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            Log.e("NoteFormActivity", e.toString());
-            Toast.makeText(this, "Isi catatan tidak dapat dibaca", Toast.LENGTH_SHORT).show();
-        }
-
-        note = text.toString();
-        noteInput.setText(note);
+        titleInput.setText(title);
+        noteInput.setText(content);
     }
 
     protected void writeNote() {
-        String state = Environment.getExternalStorageState();
-
-        if (!state.equals(Environment.MEDIA_MOUNTED)) return;
-
-        String title = titleInput.getText().toString();
-        String note = noteInput.getText().toString();
+        SQLiteDatabase db = Account.dbHelper.getWritableDatabase();
+        title = titleInput.getText().toString();
+        note = noteInput.getText().toString();
         
         if (title.isEmpty() || note.isEmpty()) {
             Toast.makeText(this, "Judul dan isi tidak boleh kosong!", Toast.LENGTH_SHORT).show();
             return;
         }
-        File parent = new File(NOTES_DIR);
 
-        if (!parent.exists()) parent.mkdirs();
+        ContentValues values = new ContentValues();
 
-        try {
-            File file = new File(parent, title);
-            FileOutputStream outputStream = new FileOutputStream(file, false);
+        values.put(NotesTable.USERNAME, Account.username);
+        values.put(NotesTable.TITLE, title);
+        values.put(NotesTable.CONTENT, note);
+        values.put(NotesTable.MODIFIED, modified);
 
-            file.createNewFile();
-            outputStream.write(note.getBytes());
-            outputStream.flush();
-            outputStream.close();
-        } catch (IOException e) {
-            Log.e("NoteFormActivity", e.toString());
-            Toast.makeText(this, "Tidak dapat menyimpan catatan", Toast.LENGTH_SHORT).show();
+        if (id != null) {
+            db.update(
+                    NotesTable.TABLE,
+                    values,
+                    NotesTable.ID + " = ?",
+                    new String[] { id }
+            );
+        } else {
+            db.insert(NotesTable.TABLE, null, values);
         }
 
         this.finish();
